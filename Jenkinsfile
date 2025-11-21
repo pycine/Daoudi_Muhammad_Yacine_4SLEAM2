@@ -29,7 +29,7 @@ pipeline {
 
   
     }
-  }
+  
 
   post {
     success {
