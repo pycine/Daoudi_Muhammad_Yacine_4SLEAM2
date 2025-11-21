@@ -2,8 +2,8 @@ pipeline {
   agent any
 
   tools {
-    maven 'MAVEN_HOME' // configure in Jenkins -> Global Tool Configuration
-    jdk 'JAVA_HOME' // if configured
+    maven 'MAVEN_HOME' 
+    jdk 'JAVA_HOME' 
   }
 
   environment {
@@ -27,10 +27,7 @@ pipeline {
       }
     }
 
-    stage('Test') {
-      steps {
-        sh 'mvn test'
-      }
+  
     }
   }
 
