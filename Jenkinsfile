@@ -23,7 +23,6 @@ pipeline {
     stage('Build') {
       steps {
         sh 'mvn -B clean package'
-        archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
       }
     }
 
