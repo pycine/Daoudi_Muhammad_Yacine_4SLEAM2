@@ -11,9 +11,9 @@ pipeline {
     DOCKER_REGISTRY = 'docker.io'
     DOCKER_CREDENTIALS = '07415ae6-8b78-4b14-b710-4cdb822432d6'
     DOCKER_USERNAME = 'yacineda'
-    IMAGE_NAME = '${DOCKER_USERNAME}/daoudi-app'
-    IMAGE_TAG = '${BUILD_NUMBER}'
-    FULL_IMAGE_NAME = '${IMAGE_NAME}:${IMAGE_TAG}'
+    IMAGE_NAME = "${env.DOCKER_USERNAME}/daoudi-app"
+    IMAGE_TAG = "${env.BUILD_NUMBER}"
+    FULL_IMAGE_NAME = "${env.IMAGE_NAME}:${env.IMAGE_TAG}"
   }
   
   stages {
