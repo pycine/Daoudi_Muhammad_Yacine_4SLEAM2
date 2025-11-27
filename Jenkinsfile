@@ -36,8 +36,8 @@ pipeline {
       steps {
         script {
           echo "Construction de l'image Docker: ${FULL_IMAGE_NAME}"
-          sh 'docker build -t ${FULL_IMAGE_NAME} .'
-          sh 'docker tag ${FULL_IMAGE_NAME} ${IMAGE_NAME}:latest'
+          sh "docker build -t ${FULL_IMAGE_NAME} ."
+          sh "docker tag ${FULL_IMAGE_NAME} ${IMAGE_NAME}:latest"
         }
       }
     }
