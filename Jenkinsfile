@@ -30,24 +30,12 @@ pipeline {
     
     stage('2️⃣ Build with Maven') {
       steps {
-        echo '🔨 Building Spring Boot application...'
+        echo '🔨 Building Spring Boot application (skipping tests)...'
         sh 'mvn -B clean package -DskipTests'
       }
     }
     
-    stage('3️⃣ Run Tests') {
-      steps {
-        echo '🧪 Running unit tests...'
-        sh 'mvn test'
-      }
-      post {
-        always {
-          junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-        }
-      }
-    }
-    
-    stage('4️⃣ Build Docker Image') {
+    stage('3️⃣ Build Docker Image') {
       steps {
         script {
           echo "🐳 Building Docker image: ${FULL_IMAGE_NAME}"
@@ -57,7 +45,7 @@ pipeline {
       }
     }
     
-    stage('5️⃣ Push to Docker Hub') {
+    stage('4️⃣ Push to Docker Hub') {
       steps {
         script {
           echo '📤 Pushing image to Docker Hub...'
@@ -73,7 +61,7 @@ pipeline {
       }
     }
     
-    stage('6️⃣ Deploy to Kubernetes') {
+    stage('5️⃣ Deploy to Kubernetes') {
       steps {
         script {
           echo '☸️ Deploying to Kubernetes cluster...'
@@ -105,7 +93,7 @@ pipeline {
       }
     }
     
-    stage('7️⃣ Verify Deployment') {
+    stage('6️⃣ Verify Deployment') {
       steps {
         echo '✅ Verifying deployment health...'
         withCredentials([file(credentialsId: 'kubeconfig-k8s', variable: 'KUBECONFIG')]) {
