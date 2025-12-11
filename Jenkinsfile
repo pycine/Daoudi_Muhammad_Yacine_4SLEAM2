@@ -66,7 +66,6 @@ pipeline {
         script {
           echo '☸️ Deploying to Kubernetes cluster...'
           
-          // Use kubeconfig from Jenkins credentials
           withCredentials([file(credentialsId: 'kubeconfig-k8s', variable: 'KUBECONFIG')]) {
             sh '''
               export KUBECONFIG=$KUBECONFIG
@@ -74,17 +73,23 @@ pipeline {
               echo "Testing kubectl connection..."
               kubectl cluster-info
               
-              echo "Applying Kubernetes configurations..."
-              kubectl apply -f all-in-one.yaml --namespace=${K8S_NAMESPACE}
+              echo "Applying MySQL deployment..."
+              kubectl apply -f k8s/mysql-deployment.yaml --namespace=${K8S_NAMESPACE}
               
-              echo "Waiting for MySQL deployment to be ready..."
-              kubectl rollout status deployment/mysql --namespace=${K8S_NAMESPACE} --timeout=5m || true
+              echo "Waiting for MySQL to be ready..."
+              kubectl wait --for=condition=ready pod -l app=mysql --namespace=${K8S_NAMESPACE} --timeout=5m || true
+              
+              echo "Applying Spring Boot deployment..."
+              kubectl apply -f k8s/spring-boot-deployment.yaml --namespace=${K8S_NAMESPACE}
               
               echo "Updating Spring Boot deployment with new image..."
-              kubectl set image deployment/spring-app spring-app=${FULL_IMAGE_NAME} --namespace=${K8S_NAMESPACE}
+              kubectl set image deployment/spring-boot-app spring-boot-app=${FULL_IMAGE_NAME} --namespace=${K8S_NAMESPACE}
+              
+              echo "Restarting deployment to pull new image..."
+              kubectl rollout restart deployment/spring-boot-app --namespace=${K8S_NAMESPACE}
               
               echo "Waiting for Spring Boot deployment to be ready..."
-              kubectl rollout status deployment/spring-app --namespace=${K8S_NAMESPACE} --timeout=5m
+              kubectl rollout status deployment/spring-boot-app --namespace=${K8S_NAMESPACE} --timeout=5m
               
               echo "✅ Deployment completed successfully!"
             '''
@@ -109,16 +114,16 @@ pipeline {
             
             echo ""
             echo "=== Waiting for pods to be ready ==="
-            kubectl wait --for=condition=ready pod -l app=spring-app --namespace=${K8S_NAMESPACE} --timeout=5m || true
+            kubectl wait --for=condition=ready pod -l app=spring-boot-app --namespace=${K8S_NAMESPACE} --timeout=5m || true
             kubectl wait --for=condition=ready pod -l app=mysql --namespace=${K8S_NAMESPACE} --timeout=5m || true
             
             echo ""
             echo "=== Application Logs (last 30 lines) ==="
-            kubectl logs deployment/spring-app --namespace=${K8S_NAMESPACE} --tail=30 || echo "Could not fetch logs yet"
+            kubectl logs deployment/spring-boot-app --namespace=${K8S_NAMESPACE} --tail=30 || echo "Could not fetch logs yet"
             
             echo ""
             echo "=== Deployment Details ==="
-            kubectl describe deployment/spring-app --namespace=${K8S_NAMESPACE} | grep -A 5 "Image:"
+            kubectl describe deployment/spring-boot-app --namespace=${K8S_NAMESPACE} | grep -A 5 "Image:"
             
             echo ""
             echo "=== All Resources ==="
@@ -144,9 +149,9 @@ pipeline {
               echo ""
               echo "=== Final Status ==="
               kubectl get pods --namespace=${K8S_NAMESPACE}
-              kubectl get svc spring-service --namespace=${K8S_NAMESPACE}
+              kubectl get svc spring-boot-service --namespace=${K8S_NAMESPACE}
               echo ""
-              echo "🌐 Access the application at: http://$(minikube ip):30080/student/"
+              echo "🌐 Access the application at: http://$(minikube ip):30081/student/students/getAllStudents"
             '''
           } catch (Exception e) {
             echo "Could not get deployment info"
