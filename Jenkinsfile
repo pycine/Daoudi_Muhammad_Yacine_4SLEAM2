@@ -15,6 +15,8 @@ pipeline {
     IMAGE_TAG = "${env.BUILD_NUMBER}"
     FULL_IMAGE_NAME = "${env.IMAGE_NAME}:${env.IMAGE_TAG}"
     K8S_NAMESPACE = 'default'
+    SONAR_HOST_URL = 'http://192.168.49.2:30900/'
+    SONAR_AUTH_TOKEN = credentials('sonar')
   }
   
   stages {
@@ -170,4 +172,13 @@ pipeline {
       sh 'docker image prune -f || true'
     }
   }
+  stage('SonarQube Analysis') {
+
+
+    steps {
+        sh 'mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN'
+    }
+}
+
+  
 }
