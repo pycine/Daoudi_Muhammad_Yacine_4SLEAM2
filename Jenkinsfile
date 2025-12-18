@@ -134,6 +134,13 @@ pipeline {
         }
       }
     }
+      stage('SonarQube Analysis') {
+
+
+    steps {
+        sh 'mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN'
+    }
+}
   }
   
   post {
@@ -172,13 +179,7 @@ pipeline {
       sh 'docker image prune -f || true'
     }
   }
-  stage('SonarQube Analysis') {
 
-
-    steps {
-        sh 'mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN'
-    }
-}
 
   
 }
